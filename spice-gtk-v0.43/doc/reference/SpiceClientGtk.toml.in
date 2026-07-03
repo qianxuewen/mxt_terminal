@@ -1,0 +1,38 @@
+[library]
+version = "@VERSION@"
+description = "A GTK widget for SPICE display"
+authors = "The Spice Project"
+license = "LGPL-2.1-or-later"
+browse_url = "https://gitlab.freedesktop.org/spice/spice-gtk/"
+repository_url = "https://gitlab.freedesktop.org/spice/spice-gtk.git"
+devhelp = true
+search_index = true
+
+  [dependencies."GObject-2.0"]
+  name = "GObject"
+  description = "The base type system library"
+  docs_url = "https://docs.gtk.org/gobject/"
+
+  [dependencies."Gtk-3.0"]
+  name = "Gtk"
+  description = "The GTK toolkit"
+  docs_url = "https://docs.gtk.org/gtk3/"
+
+  [dependencies."SpiceClientGLib-2.0"]
+  name = "SpiceClientGLib"
+  description = "SPICE client GLib library"
+  docs_url = "../SpiceClientGLib-2.0/"
+
+[theme]
+name = "basic"
+show_index_summary = true
+show_class_hierarchy = true
+
+[source-location]
+base_url = "https://gitlab.freedesktop.org/spice/spice-gtk/-/blob/master/"
+
+[extra]
+urlmap_file = "urlmap.js"
+content_files = [
+  "gtk-overview.md",
+]

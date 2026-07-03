@@ -81,6 +81,21 @@ fn disconnect_spice(app_handle: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn get_usb_devices() -> Result<String, String> {
+    use libloading::Library;
+    unsafe {
+        let lib = Library::new("spice-bridge.dll").or(Err("DLL not found"))?;
+        let func: libloading::Symbol<unsafe extern "C" fn(*mut i8, i32) -> i32> =
+            lib.get(b"spice_get_usb_list").map_err(|e| e.to_string())?;
+        let mut buf = vec![0u8; 4096];
+        let _count = func(buf.as_mut_ptr() as *mut i8, 4096);
+        let s = std::ffi::CStr::from_ptr(buf.as_ptr() as *const i8)
+            .to_string_lossy().into_owned();
+        Ok(s)
+    }
+}
+
+#[tauri::command]
 fn send_spice_input(event_type: String, data: String) -> Result<(), String> {
     // 使用 spice_ffi 模块中的输入函数
     spice_ffi::send_input(&event_type, &data)
@@ -96,7 +111,7 @@ fn main() {
     tauri::Builder::default()
         .manage(Arc::new(Mutex::new(SpiceState { session: None })))
         .invoke_handler(tauri::generate_handler![
-            connect_spice, disconnect_spice, send_spice_input,
+            connect_spice, disconnect_spice, send_spice_input, get_usb_devices,
         ])
         .run(tauri::generate_context!())
         .expect("error");

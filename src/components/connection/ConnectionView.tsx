@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useConnectionStore } from '@/store/connectionStore';
-import StatusIndicator from '@/components/common/StatusIndicator';
 import Watermark from '@/components/common/Watermark';
 import SpiceCanvas from '@/components/connection/SpiceCanvas';
 import FloatingBall from '@/components/floating-ball/FloatingBall';
@@ -16,6 +15,7 @@ const ConnectionView: React.FC = () => {
   const connection = id ? connections[id] : null;
 
   const [page, setPage] = useState<ViewPage>('overview');
+  const [metrics, setMetrics] = useState({ fps: 0, width: 0, height: 0 });
 
   useEffect(() => {
     if (id) connect(id);
@@ -45,7 +45,7 @@ const ConnectionView: React.FC = () => {
   const renderPage = () => {
     switch (page) {
       case 'overview':
-        return <SpiceCanvas host={connection.spiceConfig.host} port={connection.spiceConfig.port} />;
+        return <SpiceCanvas host={connection.spiceConfig.host} port={connection.spiceConfig.port} onMetrics={setMetrics} />;
 
       case 'quality': {
         const q = connection.displaySettings.quality;
@@ -114,26 +114,14 @@ const ConnectionView: React.FC = () => {
 
   return (
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#0a0a14' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={handleBack} style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: 16 }}>← 返回</button>
-          <StatusIndicator status={state} size="small" />
-          <span style={{ color: '#aaa', fontSize: 13 }}>{connection.spiceConfig.host}:{connection.spiceConfig.port}</span>
-        </div>
-        {isConnected && (
-          <button onClick={handleDisconnect} style={{ padding: '6px 16px', background: 'rgba(255,77,79,0.15)', border: '1px solid rgba(255,77,79,0.3)', borderRadius: 6, color: '#ff4d4f', fontSize: 13, cursor: 'pointer' }}>
-            断开连接
-          </button>
-        )}
-      </div>
-
+      {/* 极简顶栏 - 只保留页面切换标签 */}
       {isConnected && (
-        <div style={{ display: 'flex', gap: 2, padding: '8px 16px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', gap: 2, padding: '6px 16px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,10,20,0.8)', backdropFilter: 'blur(8px)', zIndex: 50 }}>
           {([['overview', '概览'], ['quality', '画质'], ['peripherals', '外设'], ['files', '文件']] as [ViewPage, string][]).map(([k, lb]) => (
             <button key={k} onClick={() => setPage(k)} style={{
-              padding: '8px 20px', background: 'none', border: 'none',
+              padding: '6px 16px', background: 'none', border: 'none',
               borderBottom: `2px solid ${page === k ? '#4a6cf7' : 'transparent'}`,
-              color: page === k ? '#4a6cf7' : '#888', fontSize: 14, cursor: 'pointer',
+              color: page === k ? '#4a6cf7' : '#888', fontSize: 13, cursor: 'pointer',
             }}>{lb}</button>
           ))}
         </div>
@@ -155,7 +143,13 @@ const ConnectionView: React.FC = () => {
         rotation: -30, density: 10, dynamic: true, userName: '管理员',
         timestamp: new Date().toISOString(),
       }} />
-      {isConnected && <FloatingBall />}
+      <FloatingBall
+        state={state}
+        hostPort={`${connection.spiceConfig.host}:${connection.spiceConfig.port}`}
+        onBack={handleBack}
+        onDisconnect={handleDisconnect}
+        metrics={metrics}
+      />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

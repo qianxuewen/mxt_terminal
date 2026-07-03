@@ -1,7 +1,11 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { toast } from '@/components/common/Toast';
 
-interface SpiceCanvasProps { host: string; port: number; }
+interface SpiceCanvasProps {
+  host: string; port: number;
+  /** 每秒上报一次指标 (FPS/分辨率) */
+  onMetrics?: (m: { fps: number; width: number; height: number }) => void;
+}
 
 type BridgeMsg =
   | { type: 'frame'; data: { w: number; h: number; rgba: string } }
@@ -28,13 +32,16 @@ async function tauriListen(event: string, cb: (data: any) => void) {
   return () => window.removeEventListener(event, handler);
 }
 
-const SpiceCanvas: React.FC<SpiceCanvasProps> = ({ host, port }) => {
+const SpiceCanvas: React.FC<SpiceCanvasProps> = ({ host, port, onMetrics }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [connected, setConnected] = useState(false);
   const [statusMsg, setStatusMsg] = useState('准备连接...');
   const [fps, setFps] = useState(0);
+  const [dim, setDim] = useState({ w: 0, h: 0 });
   const cleanupsRef = useRef<Array<() => void>>([]);
   const autoStartedRef = useRef(false);
+  const frameCountRef = useRef(0);
+  const lastTimeRef = useRef(Date.now());
 
   const renderFrame = useCallback((w: number, h: number, b64: string) => {
     const canvas = canvasRef.current;
@@ -48,8 +55,17 @@ const SpiceCanvas: React.FC<SpiceCanvasProps> = ({ host, port }) => {
       canvas.width = w; canvas.height = h;
       ctx.putImageData(new ImageData(rgba, w, h), 0, 0);
     } catch {}
-    if (fps === 0) setFps(30);
-  }, [fps]);
+    frameCountRef.current++;
+    const now = Date.now();
+    if (now - lastTimeRef.current >= 1000) {
+      const currentFps = frameCountRef.current;
+      frameCountRef.current = 0;
+      lastTimeRef.current = now;
+      setFps(currentFps);
+      setDim({ w, h });
+      onMetrics?.({ fps: currentFps, width: w, height: h });
+    }
+  }, [onMetrics]);
 
   const startConnection = useCallback(async () => {
     setStatusMsg('正在连接 SPICE 服务器...');

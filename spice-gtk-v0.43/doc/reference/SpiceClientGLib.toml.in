@@ -1,0 +1,136 @@
+[library]
+version = "@VERSION@"
+description = "A GLib-based library for interacting with SPICE servers"
+authors = "The Spice Project"
+license = "LGPL-2.1-or-later"
+browse_url = "https://gitlab.freedesktop.org/spice/spice-gtk/"
+repository_url = "https://gitlab.freedesktop.org/spice/spice-gtk.git"
+devhelp = true
+search_index = true
+
+  [dependencies."GObject-2.0"]
+  name = "GObject"
+  description = "The base type system library"
+  docs_url = "https://docs.gtk.org/gobject/"
+
+  [dependencies."Gio-2.0"]
+  name = "Gio"
+  description = "GObject interfaces and objects"
+  docs_url = "https://docs.gtk.org/gio/"
+
+  [dependencies."GstBase-1.0"]
+  name = "GstBase"
+  description = "GStreamer Base Library"
+  docs_url = "https://gstreamer.freedesktop.org/documentation/base/"
+
+[theme]
+name = "basic"
+show_index_summary = true
+show_class_hierarchy = true
+
+[source-location]
+base_url = "https://gitlab.freedesktop.org/spice/spice-gtk/-/blob/master/"
+
+[extra]
+urlmap_file = "urlmap.js"
+content_files = [
+  "overview.md",
+  "session-channels.md",
+  "application-support.md",
+]
+
+# Hide version/deprecation macros (internal implementation)
+[[object]]
+pattern = "GTK_DEPRECATED_IN_.*"
+hidden = true
+
+[[object]]
+name = "GTK_ENCODE_VERSION"
+hidden = true
+
+# Hide internal structs
+[[object]]
+name = "MsgIn"
+hidden = true
+
+[[object]]
+name = "MsgOut"
+hidden = true
+
+# Hide internal callback
+[[object]]
+name = "msg_handler"
+hidden = true
+
+# Hide internal functions
+[[object]]
+name = "DEBUG"
+hidden = true
+
+[[object]]
+name = "URI_CLASS"
+hidden = true
+
+[[object]]
+name = "glib_get_debug"
+hidden = true
+
+[[object]]
+name = "g_signal_connect_object"
+hidden = true
+
+[[object]]
+name = "glib_signal_connect_object"
+hidden = true
+
+# Hide deprecated free-function aliases (replaced by channel methods)
+[[object]]
+name = "display_get_gl_scanout"
+hidden = true
+
+[[object]]
+name = "display_gl_draw_done"
+hidden = true
+
+[[object]]
+pattern = "inputs_.*"
+check_ignore = true
+hidden = true
+
+[[object]]
+pattern = "main_.*"
+check_ignore = true
+hidden = true
+
+[[object]]
+name = "port_event"
+hidden = true
+
+[[object]]
+name = "port_write_async"
+hidden = true
+
+[[object]]
+name = "port_write_finish"
+hidden = true
+
+[[object]]
+name = "record_send_data"
+hidden = true
+
+# Hide deprecated utility aliases
+[[object]]
+name = "util_get_debug"
+hidden = true
+
+[[object]]
+name = "util_set_debug"
+hidden = true
+
+[[object]]
+name = "util_get_version_string"
+hidden = true
+
+[[object]]
+name = "uuid_to_string"
+hidden = true

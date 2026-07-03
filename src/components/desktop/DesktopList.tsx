@@ -188,28 +188,42 @@ const DesktopList: React.FC = () => {
         </div>
       )}
 
-      {/* Desktop Grid */}
+      {/* Desktop Grid/List */}
       {!loading && filteredDesktops.length > 0 && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-            gap: 16,
-            overflow: 'auto',
-            flex: 1,
-            paddingBottom: 24,
-          }}
-        >
-          {filteredDesktops.map((desktop) => (
-            <DesktopCard
-              key={desktop.id}
-              desktop={desktop}
-              onConnect={handleConnect}
-              onPowerAction={handlePowerAction}
-              onSettings={handleSettings}
-            />
-          ))}
-        </div>
+        viewMode === 'grid' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16, overflow: 'auto', flex: 1, paddingBottom: 24, maxWidth: 1200, margin: '0 auto', width: '100%', alignContent: 'start' }}>
+            {filteredDesktops.map((desktop) => (
+              <DesktopCard key={desktop.id} desktop={desktop} onConnect={handleConnect} onPowerAction={handlePowerAction} onSettings={handleSettings} />
+            ))}
+          </div>
+        ) : (
+          <div style={{ overflow: 'auto', flex: 1, paddingBottom: 24 }}>
+            {filteredDesktops.map((desktop) => (
+              <div
+                key={desktop.id}
+                onClick={() => desktop.status === 'running' && handleConnect(desktop)}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', marginBottom: 4, background: 'rgba(255,255,255,0.02)', borderRadius: 8, cursor: desktop.status === 'running' ? 'pointer' : 'default', border: '1px solid rgba(255,255,255,0.04)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+              >
+                <span style={{ fontSize: 24 }}>{desktop.osType === 'windows' ? '🪟' : '🐧'}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 500 }}>{desktop.name}</div>
+                  <div style={{ color: '#888', fontSize: 12, marginTop: 2 }}>{desktop.osName} · {desktop.cpu}vCPU · {desktop.memory}GB · {desktop.ipAddress}:{desktop.spicePort}</div>
+                </div>
+                <StatusIndicator status={desktop.status} size="small" />
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {desktop.status === 'running' ? (
+                    <button onClick={(e) => { e.stopPropagation(); handleConnect(desktop); }} style={{ padding: '4px 12px', background: 'linear-gradient(135deg, #4a6cf7, #6a3de8)', border: 'none', borderRadius: 4, color: '#fff', fontSize: 12, cursor: 'pointer' }}>连接</button>
+                  ) : (
+                    <button onClick={(e) => { e.stopPropagation(); handlePowerAction(desktop, 'start'); }} style={{ padding: '4px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4, color: '#999', fontSize: 12, cursor: 'pointer' }}>开机</button>
+                  )}
+                  <button onClick={(e) => { e.stopPropagation(); handleSettings(desktop); }} style={{ padding: '4px 8px', background: 'none', border: 'none', color: '#666', fontSize: 14, cursor: 'pointer' }}>⋯</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       )}
     </div>
   );

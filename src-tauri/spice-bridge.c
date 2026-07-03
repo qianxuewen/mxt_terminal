@@ -88,6 +88,35 @@ __declspec(dllexport) void spice_stop(void){
     g_quit=0;g_inputs=NULL;
 }
 __declspec(dllexport) int spice_is_running(void){return g_session!=NULL?1:0;}
+
+/* USB 设备管理 */
+__declspec(dllexport) int spice_get_usb_count(void){
+    if(!g_session)return 0;
+    SpiceUsbDeviceManager *mgr=spice_usb_device_manager_get(g_session,NULL);
+    if(!mgr)return 0;
+    GPtrArray *devs=spice_usb_device_manager_get_devices(mgr);
+    return devs?devs->len:0;
+}
+
+__declspec(dllexport) int spice_get_usb_list(char*buf,int maxlen){
+    if(!buf||maxlen<4)return -1;
+    buf[0]='[';int pos=1;
+    if(!g_session){buf[1]=']';buf[2]=0;return 0;}
+    SpiceUsbDeviceManager *mgr=spice_usb_device_manager_get(g_session,NULL);
+    if(!mgr){buf[1]=']';buf[2]=0;return 0;}
+    GPtrArray *devs=spice_usb_device_manager_get_devices(mgr);
+    if(!devs){buf[1]=']';buf[2]=0;return 0;}
+    for(guint i=0;i<devs->len&&pos<maxlen-200;i++){
+        SpiceUsbDevice *dev=(SpiceUsbDevice*)g_ptr_array_index(devs,i);
+        gchar *desc=spice_usb_device_get_description(dev,"%d %v %m");
+        int conn=spice_usb_device_manager_is_device_connected(mgr,dev);
+        if(i>0&&pos<maxlen-2){buf[pos++]=',';buf[pos]=0;}
+        int n=snprintf(buf+pos,maxlen-pos,"{\"id\":%u,\"desc\":\"%s\",\"connected\":%d}",i,desc?desc:"",conn);
+        if(n>0)pos+=n;g_free(desc);
+    }
+    if(pos<maxlen){buf[pos++]=']';buf[pos]=0;}
+    return devs->len;
+}
 __declspec(dllexport) void spice_send_key(const char*key,int down){
     if(!g_inputs||!SPICE_IS_INPUTS_CHANNEL(g_inputs))return;
     static const struct{const char*n;int s;}m[]={

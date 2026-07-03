@@ -1,0 +1,73 @@
+image: fedora:latest
+
+variables:
+  DEPS_COMMON: git make python3 redhat-rpm-config python3-pyparsing meson
+               ninja-build gtk-doc glib2-devel gettext gettext-devel gcc
+               gi-docgen
+
+  DEPS_FEDORA: zlib-devel openssl-devel intltool gtk3-devel
+               gobject-introspection-devel cyrus-sasl-devel
+               pulseaudio-libs-devel libjpeg-turbo-devel
+               libacl-devel gstreamer1-devel gstreamer1-plugins-base-devel
+               polkit-devel vala lz4-devel opus-devel pixman-devel
+               libcacard-devel libphodav-devel usbutils
+               usbredir-devel libusbx-devel libsoup-devel json-glib-devel
+               bzip2
+
+  DEPS_MINGW: mingw64-gcc mingw64-pkg-config mingw64-pixman mingw64-openssl
+              mingw64-gtk3 mingw64-json-glib mingw64-opus
+              mingw64-gstreamer1-plugins-base mingw64-gstreamer1-plugins-good
+              mingw64-usbredir mingw32-usbredir
+              wine
+
+  GIT_SUBMODULE_STRATEGY: recursive
+
+fedora:
+  artifacts:
+    paths:
+      - build-*/meson-logs/*.txt
+    when: always
+    expire_in: 1 week
+
+  before_script:
+    - dnf install -y $DEPS_COMMON $DEPS_FEDORA
+    - git clone ${CI_REPOSITORY_URL/spice-gtk/spice-protocol}
+    - meson setup --buildtype=release spice-protocol build-spice-protocol --prefix=/usr --werror
+    - ninja -C build-spice-protocol install
+
+  script:
+    - meson setup --buildtype=release build-default --werror
+    # Meson does not update submodules recursively
+    - git submodule update --init --recursive
+    # this fix an issue with Meson dist
+    - if ! test -r ../spice-common.git; then DIR=`basename "$PWD"`; ln -s "$DIR/.git/modules/spice-common" ../spice-common.git; fi
+    - rm -rf meson-dist
+    - ninja -C build-default dist
+    - ninja -C build-default
+    - ninja -C build-default test
+
+    - meson setup --buildtype=release build-feat-disabled -Dauto_features=disabled --werror
+    - ninja -C build-feat-disabled
+    - ninja -C build-feat-disabled test
+
+windows:
+  artifacts:
+    paths:
+      - build-win64/meson-logs/*.txt
+      - spice-protocol/build-spice-protocol/meson-logs/*.txt
+    when: always
+    expire_in: 1 week
+
+  before_script:
+    - dnf install -y $DEPS_COMMON $DEPS_MINGW
+    - git clone ${CI_REPOSITORY_URL/spice-gtk/spice-protocol}
+    - mkdir spice-protocol/build-spice-protocol && cd spice-protocol/build-spice-protocol
+    - mingw64-meson --buildtype=release --prefix=/usr --werror
+    - ninja install
+
+  script:
+    - cd $CI_PROJECT_DIR
+    - mkdir build-win64 && cd build-win64
+    - mingw64-meson --buildtype=release -Dgtk_doc=disabled --werror
+    - ninja install
+    - (cd tests && LANG=en_US.UTF-8 DISPLAY= WINEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin wine test-coroutine.exe)
