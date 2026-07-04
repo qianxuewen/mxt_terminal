@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CloudDesktop } from '@/types';
 import StatusIndicator from '@/components/common/StatusIndicator';
+import { theme } from '@/theme';
 
 interface DesktopCardProps {
   desktop: CloudDesktop;
@@ -17,16 +18,17 @@ const DesktopCard: React.FC<DesktopCardProps> = ({ desktop, onConnect, onPowerAc
 
   return (
     <div style={{
-      background: 'rgba(26, 26, 46, 0.9)', borderRadius: 12,
-      border: `1px solid ${isRunning ? 'rgba(82, 196, 26, 0.2)' : 'rgba(255,255,255,0.06)'}`,
-      overflow: 'hidden', transition: 'all 0.3s ease',
+      background: theme.bgCard, borderRadius: 12,
+      border: `1px solid ${isRunning ? 'rgba(24,113,255,0.15)' : theme.border}`,
+      overflow: 'hidden', transition: 'all 0.25s ease',
       display: 'flex', flexDirection: 'column', height: '100%',
+      boxShadow: theme.shadowCard,
     }}>
       {/* 头部 */}
-      <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${theme.borderLight}` }}>
         <span style={{ fontSize: 26, flexShrink: 0 }}>{osIcon}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{desktop.name}</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: theme.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{desktop.name}</div>
           <StatusIndicator status={desktop.status} size="small" />
         </div>
       </div>
@@ -40,7 +42,7 @@ const DesktopCard: React.FC<DesktopCardProps> = ({ desktop, onConnect, onPowerAc
       </div>
 
       {/* 操作 */}
-      <div style={{ padding: '8px 16px', display: 'flex', gap: 6, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ padding: '8px 16px', display: 'flex', gap: 6, borderTop: `1px solid ${theme.borderLight}` }}>
         {isRunning ? (
           <ActionBtn primary onClick={() => onConnect(desktop)}>连接桌面</ActionBtn>
         ) : (
@@ -54,18 +56,19 @@ const DesktopCard: React.FC<DesktopCardProps> = ({ desktop, onConnect, onPowerAc
 };
 
 const Row: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12, borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-    <span style={{ color: '#888' }}>{label}</span>
-    <span style={{ color: '#ccc' }}>{value}</span>
+  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12, borderBottom: `1px solid ${theme.borderLight}` }}>
+    <span style={{ color: theme.textTertiary }}>{label}</span>
+    <span style={{ color: theme.textSecondary }}>{value}</span>
   </div>
 );
 
 const ActionBtn: React.FC<{ primary?: boolean; onClick: () => void; children: React.ReactNode }> = ({ primary, onClick, children }) => (
   <button onClick={(e) => { e.stopPropagation(); onClick(); }} style={{
     flex: 1, padding: '6px 12px', fontSize: 12,
-    background: primary ? 'linear-gradient(135deg, #4a6cf7, #6a3de8)' : 'rgba(255,255,255,0.04)',
-    border: primary ? 'none' : '1px solid rgba(255,255,255,0.08)', borderRadius: 6,
-    color: primary ? '#fff' : '#bbb', cursor: 'pointer',
+    background: primary ? theme.gradientPrimary : theme.bgCard,
+    border: primary ? 'none' : `1px solid ${theme.border}`, borderRadius: 6,
+    color: primary ? '#fff' : theme.textSecondary, cursor: 'pointer',
+    fontWeight: primary ? 500 : 400,
   }}>{children}</button>
 );
 

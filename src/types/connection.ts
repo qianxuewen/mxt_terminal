@@ -1,7 +1,7 @@
 /** 远程连接相关类型 */
 
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'disconnecting' | 'error';
-export type DisplayQuality = 'low' | 'medium' | 'high' | 'lossless';
+export type DisplayQuality = 'smart' | 'smooth' | 'quality' | 'custom';
 export type DisplayMode = 'window' | 'fullscreen';
 
 export interface ConnectionConfig {

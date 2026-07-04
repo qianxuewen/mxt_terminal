@@ -25,10 +25,10 @@ export const toast = {
 };
 
 const TYPE_STYLES: Record<ToastType, { bg: string; icon: string; border: string }> = {
-  success: { bg: '#1a3a2a', icon: '✓', border: '#52c41a' },
-  error: { bg: '#3a1a1a', icon: '✕', border: '#ff4d4f' },
-  info: { bg: '#1a2a3a', icon: 'ℹ', border: '#1890ff' },
-  warning: { bg: '#3a2a1a', icon: '⚠', border: '#faad14' },
+  success: { bg: '#F0FFF4', icon: '✓', border: '#19BE6B' },
+  error: { bg: '#FFF2F0', icon: '✕', border: '#FF4D4F' },
+  info: { bg: '#F0F7FF', icon: 'ℹ', border: '#1871FF' },
+  warning: { bg: '#FFFBE6', icon: '⚠', border: '#F5A623' },
 };
 
 const ToastContainer: React.FC = () => {
@@ -93,21 +93,21 @@ const ToastItem: React.FC<{ toast: ToastMessage; onRemove: (id: string) => void 
         borderLeft: `4px solid ${style.border}`,
         borderRadius: 8,
         padding: '10px 16px',
-        color: '#fff',
+        color: '#1A2332',
         fontSize: 14,
         display: 'flex',
         alignItems: 'center',
         gap: 10,
         minWidth: 280,
         maxWidth: 420,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
         pointerEvents: 'auto',
         transition: 'all 0.3s ease',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateX(0)' : 'translateX(100%)',
       }}
     >
-      <span style={{ fontSize: 16, fontWeight: 'bold' }}>{style.icon}</span>
+      <span style={{ fontSize: 16, fontWeight: 'bold', color: style.border }}>{style.icon}</span>
       <span style={{ flex: 1 }}>{t.message}</span>
     </div>
   );

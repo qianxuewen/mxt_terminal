@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import DesktopCard from './DesktopCard';
 import StatusIndicator from '@/components/common/StatusIndicator';
 import { toast } from '@/components/common/Toast';
+import { theme, inputStyle, secondaryBtnStyle } from '@/theme';
 
 const DesktopList: React.FC = () => {
   const navigate = useNavigate();
@@ -81,42 +82,31 @@ const DesktopList: React.FC = () => {
         }}
       >
         <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#fff' }}>云桌面</h1>
-          <p style={{ margin: '4px 0 0', color: '#888', fontSize: 14 }}>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: theme.textPrimary }}>云桌面</h1>
+          <p style={{ margin: '4px 0 0', color: theme.textTertiary, fontSize: 14 }}>
             共 {filteredDesktops.length} 台桌面
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Status filter */}
-          {['all', 'running', 'stopped', 'suspended'].map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              style={{
-                padding: '6px 14px',
-                background: statusFilter === s ? 'rgba(74,108,247,0.2)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${statusFilter === s ? 'rgba(74,108,247,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                borderRadius: 6,
-                color: statusFilter === s ? '#4a6cf7' : '#999',
-                fontSize: 13,
-                cursor: 'pointer',
-              }}
-            >
-              {s === 'all' ? '全部' : s === 'running' ? '运行中' : s === 'stopped' ? '已关机' : '已休眠'}
-            </button>
-          ))}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ padding: '6px 10px', fontSize: 13, width: 100, border: `1px solid ${theme.borderInput}`, borderRadius: 6, color: theme.textPrimary, background: theme.bgInput }}
+          >
+            <option value="all">全部</option>
+            <option value="running">运行中</option>
+            <option value="stopped">已关机</option>
+            <option value="suspended">已休眠</option>
+          </select>
 
           {/* View toggle */}
           <button
             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
             style={{
+              ...secondaryBtnStyle,
               padding: '6px 10px',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 6,
-              color: '#999',
-              cursor: 'pointer',
               fontSize: 16,
             }}
           >
@@ -128,12 +118,13 @@ const DesktopList: React.FC = () => {
             onClick={() => fetchDesktops()}
             style={{
               padding: '6px 14px',
-              background: 'rgba(74,108,247,0.15)',
-              border: '1px solid rgba(74,108,247,0.3)',
+              background: theme.primaryLight,
+              border: `1px solid ${theme.primary}40`,
               borderRadius: 6,
-              color: '#4a6cf7',
+              color: theme.primary,
               fontSize: 13,
               cursor: 'pointer',
+              fontWeight: 500,
             }}
           >
             刷新
@@ -146,8 +137,8 @@ const DesktopList: React.FC = () => {
         <div
           style={{
             padding: '12px 16px',
-            background: 'rgba(255,77,79,0.1)',
-            border: '1px solid rgba(255,77,79,0.2)',
+            background: 'rgba(255,77,79,0.06)',
+            border: '1px solid rgba(255,77,79,0.15)',
             borderRadius: 8,
             color: '#ff4d4f',
             fontSize: 13,
@@ -164,7 +155,7 @@ const DesktopList: React.FC = () => {
           style={{
             textAlign: 'center',
             padding: 60,
-            color: '#888',
+            color: theme.textTertiary,
             fontSize: 14,
           }}
         >
@@ -179,7 +170,7 @@ const DesktopList: React.FC = () => {
           style={{
             textAlign: 'center',
             padding: 60,
-            color: '#888',
+            color: theme.textTertiary,
             fontSize: 14,
           }}
         >
@@ -202,23 +193,29 @@ const DesktopList: React.FC = () => {
               <div
                 key={desktop.id}
                 onClick={() => desktop.status === 'running' && handleConnect(desktop)}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', marginBottom: 4, background: 'rgba(255,255,255,0.02)', borderRadius: 8, cursor: desktop.status === 'running' ? 'pointer' : 'default', border: '1px solid rgba(255,255,255,0.04)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', marginBottom: 4,
+                  background: theme.bgCard, borderRadius: 8,
+                  cursor: desktop.status === 'running' ? 'pointer' : 'default',
+                  border: `1px solid ${theme.border}`,
+                  boxShadow: theme.shadowCard,
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = theme.bgCardHover; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = theme.bgCard; }}
               >
                 <span style={{ fontSize: 24 }}>{desktop.osType === 'windows' ? '🪟' : '🐧'}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 500 }}>{desktop.name}</div>
-                  <div style={{ color: '#888', fontSize: 12, marginTop: 2 }}>{desktop.osName} · {desktop.cpu}vCPU · {desktop.memory}GB · {desktop.ipAddress}:{desktop.spicePort}</div>
+                  <div style={{ color: theme.textPrimary, fontSize: 14, fontWeight: 500 }}>{desktop.name}</div>
+                  <div style={{ color: theme.textTertiary, fontSize: 12, marginTop: 2 }}>{desktop.osName} · {desktop.cpu}vCPU · {desktop.memory}GB · {desktop.ipAddress}:{desktop.spicePort}</div>
                 </div>
                 <StatusIndicator status={desktop.status} size="small" />
                 <div style={{ display: 'flex', gap: 4 }}>
                   {desktop.status === 'running' ? (
-                    <button onClick={(e) => { e.stopPropagation(); handleConnect(desktop); }} style={{ padding: '4px 12px', background: 'linear-gradient(135deg, #4a6cf7, #6a3de8)', border: 'none', borderRadius: 4, color: '#fff', fontSize: 12, cursor: 'pointer' }}>连接</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleConnect(desktop); }} style={{ padding: '4px 12px', background: theme.gradientPrimary, border: 'none', borderRadius: 4, color: '#fff', fontSize: 12, cursor: 'pointer' }}>连接</button>
                   ) : (
-                    <button onClick={(e) => { e.stopPropagation(); handlePowerAction(desktop, 'start'); }} style={{ padding: '4px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4, color: '#999', fontSize: 12, cursor: 'pointer' }}>开机</button>
+                    <button onClick={(e) => { e.stopPropagation(); handlePowerAction(desktop, 'start'); }} style={{ padding: '4px 12px', background: theme.bgCard, border: `1px solid ${theme.border}`, borderRadius: 4, color: theme.textTertiary, fontSize: 12, cursor: 'pointer' }}>开机</button>
                   )}
-                  <button onClick={(e) => { e.stopPropagation(); handleSettings(desktop); }} style={{ padding: '4px 8px', background: 'none', border: 'none', color: '#666', fontSize: 14, cursor: 'pointer' }}>⋯</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleSettings(desktop); }} style={{ padding: '4px 8px', background: 'none', border: 'none', color: theme.textTertiary, fontSize: 14, cursor: 'pointer' }}>⋯</button>
                 </div>
               </div>
             ))}

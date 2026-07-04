@@ -147,8 +147,9 @@ class FileTransferService {
     let lastTransferred = 0;
 
     for (let i = 0; i < totalChunks; i++) {
-      if (task.status === 'cancelled' || task.status === 'paused') {
-        if (task.status === 'cancelled') this.activeTransfers--;
+      const s = task.status as string;
+      if (s === 'cancelled' || s === 'paused') {
+        if (s === 'cancelled') this.activeTransfers--;
         return;
       }
 

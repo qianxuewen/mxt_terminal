@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { theme } from './theme';
 
 // Global styles
 const globalStyle = document.createElement('style');
@@ -20,8 +21,8 @@ globalStyle.textContent = `
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
       'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
-    background: #0a0a14;
-    color: #ffffff;
+    background: ${theme.bgPage};
+    color: ${theme.textPrimary};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -36,12 +37,12 @@ globalStyle.textContent = `
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
     border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
   }
 
   input, select, textarea, button {
@@ -50,11 +51,11 @@ globalStyle.textContent = `
 
   input:focus, select:focus {
     outline: none;
-    border-color: #4a6cf7 !important;
+    border-color: ${theme.primary} !important;
   }
 
   ::selection {
-    background: rgba(74, 108, 247, 0.3);
+    background: rgba(24, 113, 255, 0.2);
   }
 `;
 

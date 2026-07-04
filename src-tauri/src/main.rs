@@ -101,6 +101,19 @@ fn send_spice_input(event_type: String, data: String) -> Result<(), String> {
     spice_ffi::send_input(&event_type, &data)
 }
 
+#[tauri::command]
+fn check_port(host: String, port: u16, timeout_ms: u64) -> bool {
+    use std::net::{TcpStream, ToSocketAddrs};
+    use std::time::Duration;
+    let addr = format!("{}:{}", host, port);
+    if let Ok(mut addrs) = addr.to_socket_addrs() {
+        if let Some(addr) = addrs.next() {
+            return TcpStream::connect_timeout(&addr, Duration::from_millis(timeout_ms)).is_ok();
+        }
+    }
+    false
+}
+
 fn main() {
     std::env::set_var("PATH",
         format!("C:\\msys64\\mingw64\\bin;{}",
@@ -111,7 +124,7 @@ fn main() {
     tauri::Builder::default()
         .manage(Arc::new(Mutex::new(SpiceState { session: None })))
         .invoke_handler(tauri::generate_handler![
-            connect_spice, disconnect_spice, send_spice_input, get_usb_devices,
+            connect_spice, disconnect_spice, send_spice_input, get_usb_devices, check_port,
         ])
         .run(tauri::generate_context!())
         .expect("error");

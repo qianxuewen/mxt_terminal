@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { theme } from '@/theme';
 
 interface ModalProps {
   open: boolean;
@@ -17,7 +18,7 @@ const modalOverlayStyle: React.CSSProperties = {
   left: 0,
   width: '100vw',
   height: '100vh',
-  background: 'rgba(0, 0, 0, 0.6)',
+  background: 'rgba(0, 0, 0, 0.45)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -26,10 +27,10 @@ const modalOverlayStyle: React.CSSProperties = {
 };
 
 const modalContentStyle: React.CSSProperties = {
-  background: '#1a1a2e',
+  background: theme.bgModal,
   borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.08)',
-  boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+  border: `1px solid ${theme.border}`,
+  boxShadow: theme.shadowModal,
   maxHeight: '85vh',
   overflow: 'hidden',
   display: 'flex',
@@ -81,20 +82,20 @@ const Modal: React.FC<ModalProps> = ({
           <div
             style={{
               padding: '16px 24px',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              borderBottom: `1px solid ${theme.borderLight}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
             }}
           >
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#fff' }}>{title}</h3>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: theme.textPrimary }}>{title}</h3>
             {closable && onClose && (
               <button
                 onClick={onClose}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#999',
+                  color: theme.textTertiary,
                   cursor: 'pointer',
                   fontSize: 20,
                   padding: '4px 8px',
@@ -108,14 +109,14 @@ const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Body */}
-        <div style={{ padding: 24, overflow: 'auto', flex: 1 }}>{children}</div>
+        <div style={{ padding: 24, overflow: 'auto', flex: 1, color: theme.textPrimary }}>{children}</div>
 
         {/* Footer */}
         {footer && (
           <div
             style={{
               padding: '12px 24px',
-              borderTop: '1px solid rgba(255,255,255,0.06)',
+              borderTop: `1px solid ${theme.borderLight}`,
               display: 'flex',
               justifyContent: 'flex-end',
               gap: 8,

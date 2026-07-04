@@ -9,6 +9,7 @@ import Settings from '@/components/settings/Settings';
 import SecurityDashboard from '@/components/security/SecurityDashboard';
 import ToastContainer from '@/components/common/Toast';
 import { toast } from '@/components/common/Toast';
+import { theme } from '@/theme';
 
 /** Protected route wrapper */
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -22,18 +23,22 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
-/** Main layout with sidebar */
+/** Main layout with sidebar - TP-LINK style dark blue sidebar */
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
-  const navItems = [
-    { path: '/', icon: '🖥', label: '云桌面' },
-    { path: '/security', icon: '🔒', label: '安全中心' },
-    { path: '/settings', icon: '⚙', label: '设置' },
-  ];
+  const navItems = isAuthenticated
+    ? [
+        { path: '/', icon: '🖥', label: '云桌面' },
+        { path: '/security', icon: '🔒', label: '安全中心' },
+        { path: '/settings', icon: '⚙', label: '设置' },
+      ]
+    : [
+        { path: '/settings', icon: '⚙', label: '设置' },
+      ];
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -41,13 +46,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0a14' }}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', height: '100vh', background: theme.bgPage }}>
+      {/* Sidebar - TP-LINK deep blue */}
       <div
         style={{
           width: sidebarCollapsed ? 64 : 220,
-          background: 'rgba(16, 16, 30, 0.95)',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
+          background: theme.gradientSidebar,
           display: 'flex',
           flexDirection: 'column',
           transition: 'width 0.2s',
@@ -57,89 +61,165 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Logo */}
         <div
           style={{
-            padding: '16px',
+            padding: '20px 16px',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
           }}
         >
           <div
             style={{
-              width: 32, height: 32,
-              background: 'linear-gradient(135deg, #4a6cf7, #6a3de8)',
-              borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 18, flexShrink: 0,
+              width: 36, height: 36,
+              background: theme.gradientLogo,
+              borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20, flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(24,113,255,0.3)',
             }}
           >
             ☁
           </div>
           {!sidebarCollapsed && (
-            <span style={{ color: '#fff', fontSize: 16, fontWeight: 700, whiteSpace: 'nowrap' }}>云终端</span>
+            <div>
+              <span style={{ color: '#fff', fontSize: 16, fontWeight: 700, whiteSpace: 'nowrap' }}>TP-LINK 云终端</span>
+              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, marginTop: 1 }}>TP-LINK Cloud Terminal</div>
+            </div>
           )}
         </div>
 
         {/* Navigation */}
-        <div style={{ flex: 1, padding: '8px' }}>
+        <div style={{ flex: 1, padding: '12px 8px' }}>
           {navItems.map(({ path, icon, label }) => (
             <div
               key={path}
               onClick={() => navigate(path)}
               style={{
-                padding: '10px 12px', marginBottom: 2, borderRadius: 8, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 10,
-                background: isActive(path) ? 'rgba(74,108,247,0.15)' : 'transparent',
-                color: isActive(path) ? '#4a6cf7' : '#999',
-                fontSize: 14, transition: 'all 0.2s',
+                padding: '12px 14px', marginBottom: 2, borderRadius: 8, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: isActive(path) ? theme.bgSidebarActive : 'transparent',
+                color: isActive(path) ? '#FFFFFF' : 'rgba(255,255,255,0.65)',
+                fontSize: 14, fontWeight: isActive(path) ? 600 : 400,
+                transition: 'all 0.2s',
               }}
-              onMouseEnter={(e) => { if (!isActive(path)) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-              onMouseLeave={(e) => { if (!isActive(path)) e.currentTarget.style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                if (!isActive(path)) {
+                  e.currentTarget.style.background = theme.bgSidebarHover;
+                  e.currentTarget.style.color = '#fff';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive(path)) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.65)';
+                }
+              }}
             >
-              <span style={{ fontSize: 18 }}>{icon}</span>
+              <span style={{ fontSize: 18, width: 24, textAlign: 'center', opacity: isActive(path) ? 1 : 0.7 }}>{icon}</span>
               {!sidebarCollapsed && <span>{label}</span>}
             </div>
           ))}
         </div>
 
-        {/* User info */}
-        <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-              padding: '8px', borderRadius: 8,
-            }}
-            onClick={() => navigate('/settings')}
-          >
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #4a6cf7, #6a3de8)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 'bold', flexShrink: 0,
-            }}>
-              {user?.displayName?.[0] || 'U'}
-            </div>
-            {!sidebarCollapsed && (
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ color: '#fff', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user?.displayName || '用户'}
+        {/* User info / Device info */}
+        <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          {isAuthenticated ? (
+            <>
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+                  padding: '8px', borderRadius: 8,
+                }}
+                onClick={() => navigate('/settings')}
+              >
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: theme.gradientLogo,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 'bold', flexShrink: 0,
+                  color: '#fff',
+                }}>
+                  {user?.displayName?.[0] || 'U'}
                 </div>
-                <div style={{ color: '#666', fontSize: 11 }}>{user?.organizationName || ''}</div>
+                {!sidebarCollapsed && (
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: '#fff', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user?.displayName || '用户'}
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>{user?.organizationName || ''}</div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+              <div
+                onClick={() => { logout(); navigate('/login'); }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  marginTop: 8, padding: '6px', borderRadius: 6, cursor: 'pointer',
+                  color: 'rgba(255,255,255,0.5)', fontSize: 12,
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#FF4D4F'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
+              >
+                退出登录
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+                  padding: '8px', borderRadius: 8,
+                }}
+                onClick={() => navigate('/settings')}
+              >
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 16, flexShrink: 0,
+                }}>
+                  ⚙
+                </div>
+                {!sidebarCollapsed && (
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: '#fff', fontSize: 13 }}>设备设置</div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>未登录</div>
+                  </div>
+                )}
+              </div>
+              <div
+                onClick={() => navigate('/login')}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  marginTop: 8, padding: '8px', borderRadius: 8, cursor: 'pointer',
+                  background: 'rgba(255,255,255,0.08)', color: '#fff',
+                  fontSize: 13, fontWeight: 500,
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+              >
+                🔑 登录
+              </div>
+            </>
+          )}
 
           {/* Collapse button */}
           <div
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            style={{ textAlign: 'center', padding: '4px', cursor: 'pointer', color: '#666', fontSize: 12, marginTop: 4 }}
+            style={{
+              textAlign: 'center', padding: '6px', cursor: 'pointer',
+              color: 'rgba(255,255,255,0.4)', fontSize: 14, marginTop: 4,
+              borderRadius: 6,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = theme.bgSidebarHover; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            {sidebarCollapsed ? '→' : '←'}
+            {sidebarCollapsed ? '▶' : '◀'}
           </div>
         </div>
       </div>
 
-      {/* Main content */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      {/* Main content - white/light background */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: theme.bgPage }}>
         {children}
       </div>
     </div>
@@ -149,13 +229,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 /** App entry component */
 const AppContent: React.FC = () => {
   const { isAuthenticated, loading } = useAuthStore();
-
-  // Check stored auth
-  useEffect(() => {
-    const storedUser = localStorage.getItem('auth_user');
-    const storedToken = localStorage.getItem('auth_token');
-    // Auth store handles rehydration on login
-  }, []);
 
   return (
     <>
@@ -187,11 +260,9 @@ const AppContent: React.FC = () => {
         } />
 
         <Route path="/settings" element={
-          <ProtectedRoute>
             <MainLayout>
               <Settings />
             </MainLayout>
-          </ProtectedRoute>
         } />
 
         <Route path="/security" element={

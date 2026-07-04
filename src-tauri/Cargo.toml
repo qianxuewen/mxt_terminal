@@ -1,15 +1,15 @@
 [package]
 name = "cloud-terminal"
 version = "1.0.0"
-description = "Cloud Terminal Client - 云终端客户端"
-authors = ["Cloud Terminal Team"]
+description = "TP-LINK Cloud Terminal - TP-LINK 云终端客户端"
+authors = ["TP-LINK"]
 edition = "2021"
 
 [build-dependencies]
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.6", features = [ "protocol-asset", "dialog-save", "shell-open", "dialog-open", "fs-all"] }
+tauri = { version = "1.6", features = [ "window-all", "protocol-asset", "dialog-save", "shell-open", "dialog-open", "fs-all"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 log = "0.4"

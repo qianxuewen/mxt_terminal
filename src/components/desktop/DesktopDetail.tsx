@@ -4,6 +4,7 @@ import { useDesktopStore } from '@/store/desktopStore';
 import StatusIndicator from '@/components/common/StatusIndicator';
 import Modal from '@/components/common/Modal';
 import { toast } from '@/components/common/Toast';
+import { theme, cardStyle, detailRowStyle, secondaryBtnStyle } from '@/theme';
 
 const DesktopDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,7 +40,7 @@ const DesktopDetail: React.FC = () => {
 
   if (!desktop) {
     return (
-      <div style={{ textAlign: 'center', padding: 60, color: '#888' }}>
+      <div style={{ textAlign: 'center', padding: 60, color: theme.textTertiary }}>
         桌面未找到
       </div>
     );
@@ -65,16 +66,9 @@ const DesktopDetail: React.FC = () => {
   };
 
   const sectionStyle: React.CSSProperties = {
-    background: 'rgba(26, 26, 46, 0.9)',
-    borderRadius: 12,
-    border: '1px solid rgba(255,255,255,0.06)',
+    ...cardStyle,
     padding: 20,
     marginBottom: 16,
-  };
-
-  const detailRowStyle: React.CSSProperties = {
-    display: 'flex', justifyContent: 'space-between', padding: '8px 0',
-    fontSize: 14, borderBottom: '1px solid rgba(255,255,255,0.04)',
   };
 
   const containerStyle: React.CSSProperties = {
@@ -83,10 +77,10 @@ const DesktopDetail: React.FC = () => {
   };
 
   const powerActions = [
-    { action: 'start' as const, label: '开机', icon: '▶', color: '#52c41a' },
-    { action: 'stop' as const, label: '关机', icon: '⏹', color: '#ff4d4f' },
-    { action: 'restart' as const, label: '重启', icon: '🔄', color: '#faad14' },
-    { action: 'suspend' as const, label: '休眠', icon: '💤', color: '#1890ff' },
+    { action: 'start' as const, label: '开机', icon: '▶', color: '#19BE6B' },
+    { action: 'stop' as const, label: '关机', icon: '⏹', color: '#FF4D4F' },
+    { action: 'restart' as const, label: '重启', icon: '🔄', color: '#F5A623' },
+    { action: 'suspend' as const, label: '休眠', icon: '💤', color: '#1871FF' },
   ];
 
   return (
@@ -95,7 +89,7 @@ const DesktopDetail: React.FC = () => {
       <button
         onClick={() => navigate(-1)}
         style={{
-          background: 'none', border: 'none', color: '#4a6cf7',
+          background: 'none', border: 'none', color: theme.primary,
           fontSize: 14, cursor: 'pointer', marginBottom: 16, padding: 0,
         }}
       >
@@ -106,7 +100,7 @@ const DesktopDetail: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
         <span style={{ fontSize: 40 }}>💻</span>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#fff' }}>{desktop.name}</h1>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: theme.textPrimary }}>{desktop.name}</h1>
           <div style={{ marginTop: 4 }}>
             <StatusIndicator status={desktop.status} />
           </div>
@@ -115,15 +109,15 @@ const DesktopDetail: React.FC = () => {
 
       {/* Power Actions */}
       <div style={{ ...sectionStyle, padding: 16 }}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, color: '#888' }}>电源管理</h3>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, color: theme.textTertiary }}>电源管理</h3>
         <div style={{ display: 'flex', gap: 8 }}>
           {powerActions.map(({ action, label, icon, color }) => (
             <button
               key={action}
               onClick={() => powerAction(desktop.id, action)}
               style={{
-                flex: 1, padding: '10px', background: 'rgba(255,255,255,0.04)',
-                border: `1px solid ${color}40`, borderRadius: 8, color,
+                flex: 1, padding: '10px', background: theme.bgPage,
+                border: `1px solid ${color}30`, borderRadius: 8, color,
                 fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center',
                 justifyContent: 'center', gap: 6,
               }}
@@ -133,7 +127,7 @@ const DesktopDetail: React.FC = () => {
           ))}
         </div>
         {pwrInfo && (
-          <div style={{ marginTop: 12, fontSize: 13, color: '#888' }}>
+          <div style={{ marginTop: 12, fontSize: 13, color: theme.textTertiary }}>
             运行时长：{Math.floor((pwrInfo.uptime || 0) / 3600)}小时 | 上次操作：{pwrInfo.lastAction}
           </div>
         )}
@@ -141,35 +135,35 @@ const DesktopDetail: React.FC = () => {
 
       {/* 基础信息 */}
       <div style={sectionStyle}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, color: '#888' }}>基础信息</h3>
-        <div style={detailRowStyle}><span style={{ color: '#888' }}>桌面 ID</span><span style={{ color: '#ccc' }}>{desktop.id}</span></div>
-        <div style={detailRowStyle}><span style={{ color: '#888' }}>操作系统</span><span style={{ color: '#ccc' }}>{desktop.osName}</span></div>
-        <div style={detailRowStyle}><span style={{ color: '#888' }}>所属区域</span><span style={{ color: '#ccc' }}>{desktop.region || '-'}</span></div>
-        <div style={detailRowStyle}><span style={{ color: '#888' }}>创建时间</span><span style={{ color: '#ccc' }}>{new Date(desktop.createdAt).toLocaleString('zh-CN')}</span></div>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, color: theme.textTertiary }}>基础信息</h3>
+        <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>桌面 ID</span><span style={{ color: theme.textSecondary }}>{desktop.id}</span></div>
+        <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>操作系统</span><span style={{ color: theme.textSecondary }}>{desktop.osName}</span></div>
+        <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>所属区域</span><span style={{ color: theme.textSecondary }}>{desktop.region || '-'}</span></div>
+        <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>创建时间</span><span style={{ color: theme.textSecondary }}>{new Date(desktop.createdAt).toLocaleString('zh-CN')}</span></div>
         {desktop.expiredAt && (
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>到期时间</span><span style={{ color: '#faad14' }}>{new Date(desktop.expiredAt).toLocaleString('zh-CN')}</span></div>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>到期时间</span><span style={{ color: '#F5A623' }}>{new Date(desktop.expiredAt).toLocaleString('zh-CN')}</span></div>
         )}
       </div>
 
       {/* 配置信息 */}
       {config && (
         <div style={sectionStyle}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 14, color: '#888' }}>配置信息</h3>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>CPU</span><span style={{ color: '#ccc' }}>{config.cpu} vCPU</span></div>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>内存</span><span style={{ color: '#ccc' }}>{config.memory} GB</span></div>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>系统盘</span><span style={{ color: '#ccc' }}>{config.diskSize} GB</span></div>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>带宽</span><span style={{ color: '#ccc' }}>{config.bandwidth} Mbps</span></div>
+          <h3 style={{ margin: '0 0 12px', fontSize: 14, color: theme.textTertiary }}>配置信息</h3>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>CPU</span><span style={{ color: theme.textSecondary }}>{config.cpu} vCPU</span></div>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>内存</span><span style={{ color: theme.textSecondary }}>{config.memory} GB</span></div>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>系统盘</span><span style={{ color: theme.textSecondary }}>{config.diskSize} GB</span></div>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>带宽</span><span style={{ color: theme.textSecondary }}>{config.bandwidth} Mbps</span></div>
         </div>
       )}
 
       {/* 计费信息 */}
       {billing && (
         <div style={sectionStyle}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 14, color: '#888' }}>计费信息</h3>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>计费模式</span><span style={{ color: '#ccc' }}>{billing.chargingMode === 'postpaid' ? '按量付费' : billing.chargingMode === 'prepaid' ? '包年包月' : '按月'}</span></div>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>单价</span><span style={{ color: '#ccc' }}>¥{billing.price}/小时</span></div>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>已消费</span><span style={{ color: '#ccc' }}>¥{billing.totalSpent}</span></div>
-          <div style={detailRowStyle}><span style={{ color: '#888' }}>预计月消费</span><span style={{ color: '#faad14' }}>¥{billing.estimatedMonthly}/月</span></div>
+          <h3 style={{ margin: '0 0 12px', fontSize: 14, color: theme.textTertiary }}>计费信息</h3>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>计费模式</span><span style={{ color: theme.textSecondary }}>{billing.chargingMode === 'postpaid' ? '按量付费' : billing.chargingMode === 'prepaid' ? '包年包月' : '按月'}</span></div>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>单价</span><span style={{ color: theme.textSecondary }}>¥{billing.price}/小时</span></div>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>已消费</span><span style={{ color: theme.textSecondary }}>¥{billing.totalSpent}</span></div>
+          <div style={detailRowStyle}><span style={{ color: theme.textTertiary }}>预计月消费</span><span style={{ color: '#F5A623' }}>¥{billing.estimatedMonthly}/月</span></div>
         </div>
       )}
 
@@ -177,21 +171,13 @@ const DesktopDetail: React.FC = () => {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <button
           onClick={() => setShowResetPwd(true)}
-          style={{
-            padding: '10px 20px', background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8,
-            color: '#ccc', fontSize: 13, cursor: 'pointer',
-          }}
+          style={secondaryBtnStyle}
         >
           重置密码
         </button>
         <button
           onClick={() => setShowRestorePoint(true)}
-          style={{
-            padding: '10px 20px', background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8,
-            color: '#ccc', fontSize: 13, cursor: 'pointer',
-          }}
+          style={secondaryBtnStyle}
         >
           还原点管理
         </button>
@@ -205,25 +191,25 @@ const DesktopDetail: React.FC = () => {
         footer={
           <>
             <button onClick={() => setShowResetPwd(false)}
-              style={{ padding: '8px 20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#999', cursor: 'pointer' }}>
+              style={{ padding: '8px 20px', background: 'transparent', border: `1px solid ${theme.border}`, borderRadius: 6, color: theme.textTertiary, cursor: 'pointer' }}>
               取消
             </button>
             <button onClick={handleResetPassword}
-              style={{ padding: '8px 20px', background: 'linear-gradient(135deg, #4a6cf7, #6a3de8)', border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer' }}>
+              style={{ padding: '8px 20px', background: theme.gradientPrimary, border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer' }}>
               确认重置
             </button>
           </>
         }
       >
-        <p style={{ color: '#888', fontSize: 13, marginBottom: 12 }}>设置新的桌面登录密码</p>
+        <p style={{ color: theme.textTertiary, fontSize: 13, marginBottom: 12 }}>设置新的桌面登录密码</p>
         <input
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           placeholder="输入新密码（至少6位）"
           style={{
-            width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#fff', fontSize: 14,
+            width: '100%', padding: '10px 14px', background: theme.bgInput,
+            border: `1px solid ${theme.borderInput}`, borderRadius: 6, color: theme.textPrimary, fontSize: 14,
           }}
         />
       </Modal>
@@ -235,15 +221,15 @@ const DesktopDetail: React.FC = () => {
         onClose={() => setShowRestorePoint(false)}
       >
         {restorePoints.length === 0 ? (
-          <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>暂无还原点</p>
+          <p style={{ color: theme.textTertiary, textAlign: 'center', padding: 20 }}>暂无还原点</p>
         ) : (
           restorePoints.map((rp) => (
-            <div key={rp.id} style={{ padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={rp.id} style={{ padding: '12px 0', borderBottom: `1px solid ${theme.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ color: '#fff', fontSize: 14 }}>{rp.name}</div>
-                <div style={{ color: '#888', fontSize: 12 }}>{new Date(rp.createdAt).toLocaleString('zh-CN')} · {rp.size}MB</div>
+                <div style={{ color: theme.textPrimary, fontSize: 14 }}>{rp.name}</div>
+                <div style={{ color: theme.textTertiary, fontSize: 12 }}>{new Date(rp.createdAt).toLocaleString('zh-CN')} · {rp.size}MB</div>
               </div>
-              <button style={{ padding: '6px 12px', background: 'rgba(74,108,247,0.15)', border: '1px solid rgba(74,108,247,0.3)', borderRadius: 6, color: '#4a6cf7', fontSize: 12, cursor: 'pointer' }}>
+              <button style={{ padding: '6px 12px', background: theme.primaryLight, border: `1px solid ${theme.primary}40`, borderRadius: 6, color: theme.primary, fontSize: 12, cursor: 'pointer' }}>
                 恢复
               </button>
             </div>

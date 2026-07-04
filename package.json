@@ -2,7 +2,7 @@
   "name": "cloud-terminal",
   "private": true,
   "version": "1.0.0",
-  "description": "云终端软件 - Cloud Terminal Client inspired by Alibaba Wuying Cloud Desktop",
+  "description": "TP-LINK 云终端 - Cloud Terminal Client",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

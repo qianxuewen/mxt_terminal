@@ -6,13 +6,16 @@ import type { ClipboardDirection } from './security';
 
 export interface ConnectionSettings {
   host: string;
-  port: number;
+  devicePortType: 'lan' | 'wan' | 'other';
+  devicePort: number;
+  servicePortType: 'lan' | 'wan' | 'other';
+  servicePort: number;
   tlsEnabled: boolean;
   autoReconnect: boolean;
-  reconnectInterval: number;     // seconds
+  reconnectInterval: number;
   reconnectAttempts: number;
-  timeout: number;               // seconds
-  heartbeatInterval: number;     // seconds
+  timeout: number;
+  heartbeatInterval: number;
 }
 
 export interface DisplaySettingsConfig {
@@ -29,11 +32,17 @@ export interface DisplaySettingsConfig {
 }
 
 export interface PowerSettings {
-  autoSleepEnabled: boolean;
-  autoSleepTimeout: number;       // minutes
-  autoShutdownEnabled: boolean;
-  autoShutdownTimeout: number;    // minutes
+  // 空闲节能
+  idleAction: 'none' | 'sleep' | 'shutdown';
+  idleTimeout: number;            // minutes
+  // 定时任务
+  scheduledTaskEnabled: boolean;
+  scheduledDays: number[];        // 0=Sun, 1=Mon ... 6=Sat
+  scheduledTime: string;          // HH:mm
+  scheduledAction: 'shutdown' | 'restart';
+  // 其它
   shutdownOnAppClose: boolean;
+  shutdownOnDisconnect: boolean;
   suspendOnMinimize: boolean;
   powerButtonAction: 'sleep' | 'shutdown' | 'lock' | 'none';
 }
@@ -48,7 +57,16 @@ export interface PeripheralSettings {
   smartcardEnabled: boolean;
 }
 
+export type IPMode = 'dhcp' | 'static';
+
 export interface NetworkSettings {
+  // 基础网络
+  ipMode: IPMode;
+  ipAddress: string;
+  subnetMask: string;
+  gateway: string;
+  dnsServers: string[];
+  // 代理
   proxyEnabled: boolean;
   proxyType: 'http' | 'socks5' | 'none';
   proxyHost: string;
@@ -56,9 +74,13 @@ export interface NetworkSettings {
   proxyAuth: boolean;
   proxyUsername?: string;
   proxyPassword?: string;
-  bandwidthLimit: number;         // Mbps, 0 for unlimited
+  // 高级
+  bandwidthLimit: number;
   enableQUIC: boolean;
-  dnsServers: string[];
+  portalAuth: boolean;
+  portalType: 'none' | 'web' | 'pppoe' | '8021x' | 'l2tp' | 'pptp';
+  portalUsername: string;
+  portalPassword: string;
 }
 
 export interface AccountSettings {

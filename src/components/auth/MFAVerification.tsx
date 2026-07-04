@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { theme } from '@/theme';
 
 interface MFAVerificationProps {
   sessionId: string;
@@ -50,11 +51,11 @@ const MFAVerification: React.FC<MFAVerificationProps> = ({
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>🔐</div>
-      <h3 style={{ color: '#fff', fontSize: 20, marginBottom: 8 }}>二次验证</h3>
-      <p style={{ color: '#888', fontSize: 14, marginBottom: 24 }}>
+      <h3 style={{ color: theme.textPrimary, fontSize: 20, marginBottom: 8 }}>二次验证</h3>
+      <p style={{ color: theme.textTertiary, fontSize: 14, marginBottom: 24 }}>
         请输入发送至您手机的 6 位验证码
       </p>
-      <p style={{ color: '#666', fontSize: 12, marginBottom: 20 }}>
+      <p style={{ color: theme.textTertiary, fontSize: 12, marginBottom: 20 }}>
         会话 ID: {sessionId.slice(0, 8)}...
       </p>
 
@@ -73,10 +74,10 @@ const MFAVerification: React.FC<MFAVerificationProps> = ({
               textAlign: 'center',
               fontSize: 24,
               fontWeight: 600,
-              background: 'rgba(255,255,255,0.05)',
-              border: `2px solid ${digit ? '#4a6cf7' : 'rgba(255,255,255,0.1)'}`,
+              background: theme.bgInput,
+              border: `2px solid ${digit ? theme.primary : theme.borderInput}`,
               borderRadius: 10,
-              color: '#fff',
+              color: theme.textPrimary,
               outline: 'none',
             }}
           />
@@ -94,11 +95,11 @@ const MFAVerification: React.FC<MFAVerificationProps> = ({
           width: '100%',
           padding: '12px',
           background: code.join('').length === 6
-            ? 'linear-gradient(135deg, #4a6cf7, #6a3de8)'
-            : 'rgba(255,255,255,0.05)',
+            ? theme.gradientPrimary
+            : theme.bgInput,
           border: 'none',
           borderRadius: 8,
-          color: code.join('').length === 6 ? '#fff' : '#666',
+          color: code.join('').length === 6 ? '#fff' : theme.textDisabled,
           fontSize: 16,
           fontWeight: 600,
           cursor: loading || code.join('').length !== 6 ? 'not-allowed' : 'pointer',
@@ -114,7 +115,7 @@ const MFAVerification: React.FC<MFAVerificationProps> = ({
           style={{
             background: 'none',
             border: 'none',
-            color: '#888',
+            color: theme.textTertiary,
             fontSize: 14,
             cursor: 'pointer',
             padding: '8px',
@@ -124,8 +125,8 @@ const MFAVerification: React.FC<MFAVerificationProps> = ({
         </button>
       )}
 
-      <div style={{ marginTop: 16, color: '#666', fontSize: 12 }}>
-        未收到验证码？<span style={{ color: '#4a6cf7', cursor: 'pointer' }}>重新发送</span>
+      <div style={{ marginTop: 16, color: theme.textTertiary, fontSize: 12 }}>
+        未收到验证码？<span style={{ color: theme.primary, cursor: 'pointer' }}>重新发送</span>
       </div>
     </div>
   );

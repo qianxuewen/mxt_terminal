@@ -38,7 +38,7 @@ interface ConnectionStore {
 
 const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   mode: 'window',
-  quality: 'high',
+  quality: 'smart',
   resolution: { width: 1920, height: 1080 },
   colorDepth: 32,
   frameRate: 60,
@@ -64,7 +64,7 @@ const QUALITY_PRESETS: QualityPreset[] = [
   {
     name: 'low',
     label: '流畅优先',
-    quality: 'low',
+    quality: 'smooth',
     bandwidth: 2,
     colorDepth: 16,
     description: '降低画质保证操作流畅，适合网络较差环境',
@@ -72,7 +72,7 @@ const QUALITY_PRESETS: QualityPreset[] = [
   {
     name: 'medium',
     label: '均衡模式',
-    quality: 'medium',
+    quality: 'quality',
     bandwidth: 5,
     colorDepth: 24,
     description: '平衡画质与性能，适合一般网络环境',
@@ -80,7 +80,7 @@ const QUALITY_PRESETS: QualityPreset[] = [
   {
     name: 'high',
     label: '画质优先',
-    quality: 'high',
+    quality: 'smart',
     bandwidth: 10,
     colorDepth: 32,
     description: '高清画质体验，建议带宽 10Mbps 以上',
@@ -88,7 +88,7 @@ const QUALITY_PRESETS: QualityPreset[] = [
   {
     name: 'lossless',
     label: '无损模式',
-    quality: 'lossless',
+    quality: 'custom',
     bandwidth: 50,
     colorDepth: 32,
     description: '无损画质，适合设计、影音等专业场景',

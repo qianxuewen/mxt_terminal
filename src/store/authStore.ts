@@ -22,8 +22,8 @@ const MOCK_USER: UserInfo = {
   email: 'admin@example.com',
   phone: '13800138000',
   role: 'admin',
-  organizationId: 'org-001',
-  organizationName: '默认组织',
+  organizationId: '',
+  organizationName: '',
   permissions: ['desktop:*', 'settings:*', 'admin:*'],
 };
 

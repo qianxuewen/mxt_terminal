@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSettingsStore } from '@/store/settingsStore';
 import { toast } from '@/components/common/Toast';
+import { theme, sectionTitleStyle, cardStyle } from '@/theme';
 
 const DiagnosticTools: React.FC = () => {
   const { diagnosticInfo, runDiagnostics, loading } = useSettingsStore();
@@ -11,20 +12,20 @@ const DiagnosticTools: React.FC = () => {
   };
 
   const Divider: React.FC = () => (
-    <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '20px 0' }} />
+    <div style={{ height: 1, background: theme.borderLight, margin: '20px 0' }} />
   );
 
   return (
     <div style={{ maxWidth: 700 }}>
-      <h2 style={{ margin: '0 0 24px', fontSize: 20, fontWeight: 700, color: '#fff' }}>诊断工具</h2>
+      <h2 style={{ margin: '0 0 24px', fontSize: 20, fontWeight: 700, color: theme.textPrimary }}>诊断工具</h2>
 
       <button
         onClick={handleRunDiagnostics}
         disabled={loading}
         style={{
           padding: '10px 24px', marginBottom: 24,
-          background: loading ? 'rgba(74,108,247,0.5)' : 'linear-gradient(135deg, #4a6cf7, #6a3de8)',
-          border: 'none', borderRadius: 8, color: '#fff', fontSize: 14, fontWeight: 600,
+          background: loading ? theme.primary + '80' : theme.gradientPrimary,
+          border: 'none', borderRadius: theme.radius, color: '#fff', fontSize: 14, fontWeight: 600,
           cursor: loading ? 'not-allowed' : 'pointer',
         }}
       >
@@ -32,12 +33,12 @@ const DiagnosticTools: React.FC = () => {
       </button>
 
       {diagnosticInfo ? (
-        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 600, color: '#fff' }}>诊断结果</h3>
+        <div style={{ ...cardStyle, padding: 24 }}>
+          <h3 style={{ ...sectionTitleStyle, marginBottom: 16 }}>诊断结果</h3>
 
           {/* Network */}
           <div style={{ marginBottom: 16 }}>
-            <h4 style={{ margin: '0 0 8px', fontSize: 14, color: '#a0a0b8' }}>网络状态</h4>
+            <h4 style={{ margin: '0 0 8px', fontSize: 14, color: theme.textSecondary }}>网络状态</h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <DiagItem label="网络连接" value={diagnosticInfo.networkStatus === 'connected' ? '正常' : '异常'} good={diagnosticInfo.networkStatus === 'connected'} />
               <DiagItem label="API 服务" value={diagnosticInfo.apiConnectivity ? '正常' : '异常'} good={diagnosticInfo.apiConnectivity} />
@@ -51,7 +52,7 @@ const DiagnosticTools: React.FC = () => {
 
           {/* System */}
           <div style={{ marginBottom: 16 }}>
-            <h4 style={{ margin: '0 0 8px', fontSize: 14, color: '#a0a0b8' }}>系统状态</h4>
+            <h4 style={{ margin: '0 0 8px', fontSize: 14, color: theme.textSecondary }}>系统状态</h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <DiagItem label="CPU 使用率" value={`${diagnosticInfo.cpuUsage}%`} good={diagnosticInfo.cpuUsage < 70} />
               <DiagItem label="内存使用率" value={`${diagnosticInfo.memoryUsage}%`} good={diagnosticInfo.memoryUsage < 80} />
@@ -66,14 +67,14 @@ const DiagnosticTools: React.FC = () => {
             <>
               <Divider />
               <div>
-                <h4 style={{ margin: '0 0 8px', fontSize: 14, color: '#a0a0b8' }}>诊断日志</h4>
+                <h4 style={{ margin: '0 0 8px', fontSize: 14, color: theme.textSecondary }}>诊断日志</h4>
                 {diagnosticInfo.logs.map((log, idx) => (
                   <div key={idx} style={{
                     padding: '6px 10px', marginBottom: 4, borderRadius: 4, fontSize: 12,
-                    background: log.level === 'error' ? 'rgba(255,77,79,0.08)' :
-                               log.level === 'warn' ? 'rgba(250,173,20,0.08)' : 'rgba(255,255,255,0.02)',
+                    background: log.level === 'error' ? 'rgba(255,77,79,0.06)' :
+                               log.level === 'warn' ? 'rgba(250,173,20,0.08)' : theme.bgInput,
                     color: log.level === 'error' ? '#ff4d4f' :
-                           log.level === 'warn' ? '#faad14' : '#999',
+                           log.level === 'warn' ? '#F5A623' : theme.textTertiary,
                     fontFamily: 'monospace',
                   }}>
                     [{log.timestamp.slice(11, 19)}] [{log.module}] {log.message}
@@ -84,7 +85,7 @@ const DiagnosticTools: React.FC = () => {
           )}
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: 60, color: '#888', fontSize: 14 }}>
+        <div style={{ textAlign: 'center', padding: 60, color: theme.textTertiary, fontSize: 14 }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
           <p>点击"运行诊断"检查系统状态</p>
         </div>
@@ -94,9 +95,9 @@ const DiagnosticTools: React.FC = () => {
 };
 
 const DiagItem: React.FC<{ label: string; value: string; good: boolean }> = ({ label, value, good }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 13, borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-    <span style={{ color: '#a0a0b8' }}>{label}</span>
-    <span style={{ color: good ? '#52c41a' : '#faad14', fontWeight: good ? 400 : 600 }}>{value}</span>
+  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 13, borderBottom: `1px solid ${theme.borderLight}` }}>
+    <span style={{ color: theme.textSecondary }}>{label}</span>
+    <span style={{ color: good ? theme.success : '#F5A623', fontWeight: good ? 400 : 600 }}>{value}</span>
   </div>
 );
 

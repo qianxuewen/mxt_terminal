@@ -1,5 +1,6 @@
 import React from 'react';
 import type { DesktopStatus, ConnectionState, TransferStatus } from '@/types';
+import { theme } from '@/theme';
 
 interface StatusIndicatorProps {
   status: DesktopStatus | ConnectionState | TransferStatus | string;
@@ -10,25 +11,25 @@ interface StatusIndicatorProps {
 
 const STATUS_COLORS: Record<string, string> = {
   // Desktop status
-  running: '#52c41a',
-  stopped: '#ff4d4f',
-  suspended: '#faad14',
-  starting: '#1890ff',
-  stopping: '#ff7a45',
-  error: '#ff4d4f',
-  unknown: '#d9d9d9',
+  running: '#19BE6B',
+  stopped: '#FF4D4F',
+  suspended: '#F5A623',
+  starting: '#1871FF',
+  stopping: '#FF7A45',
+  error: '#FF4D4F',
+  unknown: '#C0C8D4',
   // Connection status
-  connected: '#52c41a',
-  connecting: '#1890ff',
-  disconnected: '#d9d9d9',
-  disconnecting: '#faad14',
+  connected: '#19BE6B',
+  connecting: '#1871FF',
+  disconnected: '#C0C8D4',
+  disconnecting: '#F5A623',
   // Transfer status
-  completed: '#52c41a',
-  transferring: '#1890ff',
-  pending: '#d9d9d9',
-  paused: '#faad14',
-  failed: '#ff4d4f',
-  cancelled: '#d9d9d9',
+  completed: '#19BE6B',
+  transferring: '#1871FF',
+  pending: '#C0C8D4',
+  paused: '#F5A623',
+  failed: '#FF4D4F',
+  cancelled: '#C0C8D4',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -59,7 +60,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 }) => {
   const sizeMap = { small: 6, default: 8, large: 12 };
   const dotSize = sizeMap[size] || 8;
-  const color = STATUS_COLORS[status] || '#d9d9d9';
+  const color = STATUS_COLORS[status] || '#C0C8D4';
   const label = labelMap?.[status] || STATUS_LABELS[status] || status;
 
   return (
@@ -72,11 +73,11 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
           backgroundColor: color,
           display: 'inline-block',
           flexShrink: 0,
-          boxShadow: `0 0 6px ${color}40`,
+          boxShadow: `0 0 6px ${color}60`,
         }}
       />
       {showLabel && (
-        <span style={{ fontSize: size === 'small' ? 12 : 14, color: '#e0e0e0' }}>
+        <span style={{ fontSize: size === 'small' ? 12 : 14, color: theme.textSecondary }}>
           {label}
         </span>
       )}
