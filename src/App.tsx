@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import LoginPage from '@/components/auth/LoginPage';
 import DesktopList from '@/components/desktop/DesktopList';
 import DesktopDetail from '@/components/desktop/DesktopDetail';
@@ -229,6 +230,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 /** App entry component */
 const AppContent: React.FC = () => {
   const { isAuthenticated, loading } = useAuthStore();
+  const loadSettings = useSettingsStore((s) => s.loadSettings);
+  useEffect(() => { loadSettings(); }, []);
 
   return (
     <>

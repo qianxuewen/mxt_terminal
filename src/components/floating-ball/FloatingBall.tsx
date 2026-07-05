@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ConnectionState } from '@/types';
 import { theme } from '@/theme';
+import { useSettingsStore } from '@/store/settingsStore';
 
 interface Metrics {
   fps: number;
@@ -140,20 +141,29 @@ const SubPanel: React.FC<{ title: string; items: { n: string; s?: string }[] }> 
   </div>
 );
 
-/* USB 设备面板 */
+/* USB 设备面板 — 与设置页共享配置 */
 const UsbPanel: React.FC = () => {
+  const { settings, saveSettings } = useSettingsStore();
+  const peri = settings.peripheral;
+
   const [policy, setPolicy] = useState<'allow_all' | 'block_all' | 'by_device'>('by_device');
-  const [redirecting, setRedirecting] = useState<Record<number, boolean>>({});
-  const [devices] = useState([
-    { id: 1, name: 'SanDisk USB 3.0 (64GB)', vendor: 'SanDisk', type: 'storage', allowed: true },
-    { id: 2, name: 'Logitech USB 摄像头 C920', vendor: 'Logitech', type: 'camera', allowed: false },
-    { id: 3, name: 'CH341 USB 串口转换器', vendor: 'WCH', type: 'serial', allowed: true },
-    { id: 4, name: 'Kingston DataTraveler (32GB)', vendor: 'Kingston', type: 'storage', allowed: false },
-    { id: 5, name: 'Microsoft 键盘 (USB)', vendor: 'Microsoft', type: 'hid', allowed: true },
-  ]);
+  const [devices, setDevices] = useState(
+    (peri.usbDevices && peri.usbDevices.length > 0) ? peri.usbDevices : [
+      { id: 1, name: 'SanDisk USB 3.0 (64GB)', vendor: 'SanDisk', type: 'storage' as const, allowed: true },
+      { id: 2, name: 'Logitech USB 摄像头 C920', vendor: 'Logitech', type: 'camera' as const, allowed: false },
+      { id: 3, name: 'CH341 USB 串口转换器', vendor: 'WCH', type: 'serial' as const, allowed: true },
+      { id: 4, name: 'Kingston DataTraveler (32GB)', vendor: 'Kingston', type: 'storage' as const, allowed: false },
+      { id: 5, name: 'Microsoft 键盘 (USB)', vendor: 'Microsoft', type: 'hid' as const, allowed: true },
+    ]
+  );
+  const [redirecting, setRedirecting] = useState<Record<number, boolean>>(peri.usbRedirect || {});
 
   const allowedDevices = devices.filter(d => d.allowed);
   const blockedDevices = devices.filter(d => !d.allowed);
+
+  const syncSettings = () => {
+    saveSettings({ peripheral: { ...peri, usbDevices: devices, usbRedirect: redirecting } });
+  };
 
   const policyStyle = (val: string) => ({
     padding: '3px 10px', fontSize: 10, borderRadius: 4, cursor: 'pointer', border: 'none',
@@ -165,9 +175,9 @@ const UsbPanel: React.FC = () => {
     <div style={{ borderTop: `1px solid ${theme.borderLight}`, paddingTop: 8 }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: theme.textPrimary, marginBottom: 6 }}>USB 外设控制</div>
       <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-        <button style={policyStyle('allow_all')} onClick={() => setPolicy('allow_all')}>全部允许</button>
-        <button style={policyStyle('block_all')} onClick={() => setPolicy('block_all')}>全部禁止</button>
-        <button style={policyStyle('by_device')} onClick={() => setPolicy('by_device')}>按设备</button>
+        <button style={policyStyle('allow_all')} onClick={() => { setPolicy('allow_all'); syncSettings(); }}>全部允许</button>
+        <button style={policyStyle('block_all')} onClick={() => { setPolicy('block_all'); syncSettings(); }}>全部禁止</button>
+        <button style={policyStyle('by_device')} onClick={() => { setPolicy('by_device'); syncSettings(); }}>按设备</button>
       </div>
       {policy === 'allow_all' && <div style={{ color: theme.success, fontSize: 11, padding: 4 }}>✓ 所有 USB 设备允许重定向</div>}
       {policy === 'block_all' && <div style={{ color: '#FF4D4F', fontSize: 11, padding: 4 }}>✕ 所有 USB 设备已禁止重定向</div>}
@@ -202,53 +212,72 @@ const UsbPanel: React.FC = () => {
   );
 };
 
-/* 音频面板 */
+/* 音频面板 — 与设置页共享配置、使用真实设备 */
 const AudioPanel: React.FC = () => {
-  const [speaker, setSpeaker] = useState('default');
-  const [mic, setMic] = useState('default');
+  const { settings, saveSettings } = useSettingsStore();
+  const peri = settings.peripheral;
+  const [speaker, setSpeaker] = useState(peri.audioOutput || '');
+  const [mic, setMic] = useState(peri.audioInput || '');
   const [muted, setMuted] = useState(false);
-  const speakerDevices = [
-    { id: 'default', name: '默认扬声器' },
-    { id: 'spice', name: 'SPICE 音频通道' },
-    { id: 'hdmi', name: 'HDMI 音频输出' },
-    { id: 'bt', name: '蓝牙耳机 (FreeBuds)' },
-  ];
-  const micDevices = [
-    { id: 'default', name: '默认麦克风' },
-    { id: 'spice', name: 'SPICE 音频通道' },
-    { id: 'webcam', name: '摄像头麦克风' },
-    { id: 'headset', name: '耳机麦克风' },
-  ];
+  const [audioIns, setAudioIns] = useState<MediaDeviceInfo[]>([]);
+  const [audioOuts, setAudioOuts] = useState<MediaDeviceInfo[]>([]);
+
+  useEffect(() => {
+    const fallbackEnum = () => {
+      navigator.mediaDevices.enumerateDevices().then(all => {
+        const ins = all.filter(d => d.kind === 'audioinput');
+        const outs = all.filter(d => d.kind === 'audiooutput');
+        setAudioIns(ins); setAudioOuts(outs);
+        if (!mic && ins.length > 0) setMic(ins[0].deviceId);
+        if (!speaker && outs.length > 0) setSpeaker(outs[0].deviceId);
+      }).catch(() => {});
+    };
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(s => { s.getTracks().forEach(t => t.stop()); return navigator.mediaDevices.enumerateDevices(); })
+      .then(all => {
+        const ins = all.filter(d => d.kind === 'audioinput');
+        const outs = all.filter(d => d.kind === 'audiooutput');
+        setAudioIns(ins); setAudioOuts(outs);
+        if (!mic && ins.length > 0) setMic(ins[0].deviceId);
+        if (!speaker && outs.length > 0) setSpeaker(outs[0].deviceId);
+      })
+      .catch(() => fallbackEnum());
+  }, []);
+
+  const syncAudio = () => {
+    saveSettings({ peripheral: { ...peri, audioInput: mic, audioOutput: speaker } });
+  };
+
   return (
     <div style={{ borderTop: `1px solid ${theme.borderLight}`, paddingTop: 10 }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: theme.textPrimary, marginBottom: 8 }}>音频设置</div>
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <span style={{ fontSize: 11, color: theme.textTertiary }}>🔊 扬声器</span>
+          <span style={{ fontSize: 11, color: theme.textTertiary }}>🔊 扬声器 ({audioOuts.length})</span>
           <button onClick={() => setMuted(!muted)} style={{ padding: '1px 8px', fontSize: 10, borderRadius: 3, cursor: 'pointer',
             background: muted ? 'rgba(255,77,79,0.08)' : 'rgba(25,190,107,0.08)',
             border: `1px solid ${muted ? 'rgba(255,77,79,0.2)' : 'rgba(25,190,107,0.2)'}`, color: muted ? '#FF4D4F' : theme.success,
           }}>{muted ? '已静音' : '正常'}</button>
         </div>
-        {speakerDevices.map(d => (
-          <div key={d.id} onClick={() => setSpeaker(d.id)} style={{ padding: '4px 8px', marginBottom: 2, borderRadius: 4, cursor: 'pointer', fontSize: 11,
-            background: speaker === d.id ? theme.primaryLight : 'transparent', display: 'flex', justifyContent: 'space-between',
+        {audioOuts.length > 0 ? audioOuts.map((d, i) => (
+          <div key={d.deviceId} onClick={() => { setSpeaker(d.deviceId); syncAudio(); }} style={{ padding: '4px 8px', marginBottom: 2, borderRadius: 4, cursor: 'pointer', fontSize: 11,
+            background: speaker === d.deviceId ? theme.primaryLight : 'transparent', display: 'flex', justifyContent: 'space-between',
           }}>
-            <span style={{ color: speaker === d.id ? theme.primary : theme.textSecondary }}>{d.name}</span>
-            {speaker === d.id && <span style={{ color: theme.primary }}>✓</span>}
+            <span style={{ color: speaker === d.deviceId ? theme.primary : theme.textSecondary }}>{d.label || `扬声器 #${i + 1}`}</span>
+            {speaker === d.deviceId && <span style={{ color: theme.primary }}>✓</span>}
           </div>
-        ))}
+        )) : <div style={{ color: theme.textTertiary, fontSize: 11, padding: '4px 0' }}>未检测到扬声器</div>}
       </div>
       <div>
-        <div style={{ fontSize: 11, color: theme.textTertiary, marginBottom: 4 }}>🎤 麦克风</div>
-        {micDevices.map(d => (
-          <div key={d.id} onClick={() => setMic(d.id)} style={{ padding: '4px 8px', marginBottom: 2, borderRadius: 4, cursor: 'pointer', fontSize: 11,
-            background: mic === d.id ? theme.primaryLight : 'transparent', display: 'flex', justifyContent: 'space-between',
+        <div style={{ fontSize: 11, color: theme.textTertiary, marginBottom: 4 }}>🎤 麦克风 ({audioIns.length})</div>
+        {audioIns.length > 0 ? audioIns.map((d, i) => (
+          <div key={d.deviceId} onClick={() => { setMic(d.deviceId); syncAudio(); }} style={{ padding: '4px 8px', marginBottom: 2, borderRadius: 4, cursor: 'pointer', fontSize: 11,
+            background: mic === d.deviceId ? theme.primaryLight : 'transparent', display: 'flex', justifyContent: 'space-between',
           }}>
-            <span style={{ color: mic === d.id ? theme.primary : theme.textSecondary }}>{d.name}</span>
-            {mic === d.id && <span style={{ color: theme.primary }}>✓</span>}
+            <span style={{ color: mic === d.deviceId ? theme.primary : theme.textSecondary }}>{d.label || `麦克风 #${i + 1}`}</span>
+            {mic === d.deviceId && <span style={{ color: theme.primary }}>✓</span>}
           </div>
-        ))}
+        )) : <div style={{ color: theme.textTertiary, fontSize: 11, padding: '4px 0' }}>未检测到麦克风</div>}
       </div>
     </div>
   );

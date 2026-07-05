@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { AppSettings, FirmwareInfo, DiagnosticInfo } from '@/types';
+import { saveSettings as dbSave, loadSettings as dbLoad, clearSettings as dbClear } from '@/services/db';
 
 interface SettingsStore {
   settings: AppSettings;
@@ -39,6 +40,10 @@ const DEFAULT_SETTINGS: AppSettings = {
     frameRateLimit: 60,
     scaling: 'fit',
     multiMonitor: false,
+    dualMode: 'extend',
+    monitorVertical: false,
+    monitorReversed: false,
+    resolutions: { 1: '1920x1080', 2: '1920x1080' },
     rememberWindowPosition: true,
     dpiScaling: 'auto',
   },
@@ -57,16 +62,11 @@ const DEFAULT_SETTINGS: AppSettings = {
   peripheral: {
     usbAutoRedirect: true,
     usbPolicy: {
-      usb: 'allow',
-      printer: 'allow',
-      camera: 'allow',
-      microphone: 'allow',
-      smartcard: 'allow',
-      storage: 'ask',
-      keyboard: 'allow',
-      mouse: 'allow',
-      other: 'ask',
+      usb: 'allow', printer: 'allow', camera: 'allow', microphone: 'allow',
+      smartcard: 'allow', storage: 'ask', keyboard: 'allow', mouse: 'allow', other: 'ask',
     } as any,
+    usbDevices: [],
+    usbRedirect: {},
     printerAutoMap: true,
     audioInput: '',
     audioOutput: '',
@@ -130,11 +130,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   loadSettings: async () => {
     set({ loading: true });
     try {
-      // Load from localStorage
-      const saved = localStorage.getItem('app_settings');
+      const saved = await dbLoad();
       if (saved) {
-        const parsed = JSON.parse(saved);
-        set({ settings: { ...DEFAULT_SETTINGS, ...parsed } });
+        set({ settings: { ...DEFAULT_SETTINGS, ...saved } });
       }
     } catch {}
     set({ loading: false });
@@ -143,21 +141,19 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   saveSettings: async (partial) => {
     set({ saving: true, error: null });
     try {
-      const merged = {
-        ...get().settings,
-        ...partial,
-        ...Object.keys(partial).reduce((acc, key) => {
-          if (typeof partial[key as keyof AppSettings] === 'object') {
-            acc[key as keyof AppSettings] = {
-              ...(get().settings as any)[key],
-              ...(partial as any)[key],
-            };
-          }
-          return acc;
-        }, {} as Partial<AppSettings>),
-      };
+      // 深度合并：只合并传入的顶层 key，避免覆盖未传入的完整对象
+      const current = get().settings;
+      const merged = { ...current };
+      for (const key of Object.keys(partial)) {
+        const pv = (partial as any)[key];
+        if (pv && typeof pv === 'object' && !Array.isArray(pv)) {
+          (merged as any)[key] = { ...(current as any)[key], ...pv };
+        } else {
+          (merged as any)[key] = pv;
+        }
+      }
 
-      localStorage.setItem('app_settings', JSON.stringify(merged));
+      await dbSave(merged);
       set({ settings: merged as AppSettings, saving: false });
     } catch (err: any) {
       set({ error: err?.message || '保存设置失败', saving: false });
@@ -165,7 +161,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   },
 
   resetSettings: async () => {
-    localStorage.removeItem('app_settings');
+    await dbClear();
     set({ settings: DEFAULT_SETTINGS });
   },
 

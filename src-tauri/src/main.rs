@@ -1,11 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod spice_ffi;
+mod db;
 
 use base64::Engine;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use tauri::Manager;
+use tauri::api::path::app_data_dir;
 
 struct SpiceState {
     session: Option<spice_ffi::SpiceSessionHandle>,
@@ -114,6 +116,68 @@ fn check_port(host: String, port: u16, timeout_ms: u64) -> bool {
     false
 }
 
+// ── Database Tauri Commands ──
+
+#[tauri::command]
+fn db_get_setting(state: tauri::State<'_, db::Database>, key: String) -> Result<Option<String>, String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::get_setting(&conn, &key).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_set_setting(state: tauri::State<'_, db::Database>, key: String, value: String) -> Result<(), String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::set_setting(&conn, &key, &value).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_get_all_settings(state: tauri::State<'_, db::Database>) -> Result<Vec<(String, String)>, String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::get_all_settings(&conn).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_delete_setting(state: tauri::State<'_, db::Database>, key: String) -> Result<(), String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::delete_setting(&conn, &key).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_get_connections(state: tauri::State<'_, db::Database>) -> Result<Vec<serde_json::Value>, String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::get_connections(&conn).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_save_connection(state: tauri::State<'_, db::Database>, connection: serde_json::Value) -> Result<(), String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::save_connection(&conn, &connection).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_delete_connection(state: tauri::State<'_, db::Database>, id: i64) -> Result<(), String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::delete_connection(&conn, id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_get_login_history(state: tauri::State<'_, db::Database>, limit: Option<i64>) -> Result<Vec<serde_json::Value>, String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::get_login_history(&conn, limit.unwrap_or(20)).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_get_usb_policies(state: tauri::State<'_, db::Database>) -> Result<Vec<serde_json::Value>, String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::get_usb_policies(&conn).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn db_set_usb_policy(state: tauri::State<'_, db::Database>, policy: serde_json::Value) -> Result<(), String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    db::set_usb_policy(&conn, &policy).map_err(|e| e.to_string())
+}
+
 fn main() {
     std::env::set_var("PATH",
         format!("C:\\msys64\\mingw64\\bin;{}",
@@ -122,9 +186,19 @@ fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     tauri::Builder::default()
+        .setup(|app| {
+            let data_dir = app_data_dir(&app.config()).ok_or("获取数据目录失败")?;
+            let database = db::Database::new(data_dir).map_err(|e| e.to_string())?;
+            app.manage(database);
+            Ok(())
+        })
         .manage(Arc::new(Mutex::new(SpiceState { session: None })))
         .invoke_handler(tauri::generate_handler![
             connect_spice, disconnect_spice, send_spice_input, get_usb_devices, check_port,
+            db_get_setting, db_set_setting, db_get_all_settings, db_delete_setting,
+            db_get_connections, db_save_connection, db_delete_connection,
+            db_get_login_history,
+            db_get_usb_policies, db_set_usb_policy,
         ])
         .run(tauri::generate_context!())
         .expect("error");
