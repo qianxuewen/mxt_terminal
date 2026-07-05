@@ -25,6 +25,10 @@ export interface DisplaySettingsConfig {
   frameRateLimit: number;
   scaling: 'fit' | 'fill' | 'stretch' | 'original';
   multiMonitor: boolean;
+  dualMode: 'extend' | 'copy';
+  monitorVertical: boolean;
+  monitorReversed: boolean;
+  resolutions: Record<number, string>;
   rememberWindowPosition: boolean;
   windowPosition?: { x: number; y: number };
   windowSize?: { width: number; height: number };
@@ -50,8 +54,10 @@ export interface PowerSettings {
 export interface PeripheralSettings {
   usbAutoRedirect: boolean;
   usbPolicy: Record<PeripheralCategory, RedirectPolicy>;
+  usbDevices: { id: number; name: string; vendor: string; type: string; allowed: boolean }[];
+  usbRedirect: Record<number, boolean>;
   printerAutoMap: boolean;
-  audioInput: string;           // device ID or name
+  audioInput: string;
   audioOutput: string;
   audioEnabled: boolean;
   smartcardEnabled: boolean;

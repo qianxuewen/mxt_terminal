@@ -44,8 +44,31 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       // TODO: Replace with actual API call
-      // Simulate API delay
       await new Promise((r) => setTimeout(r, 1000));
+
+      // 账号密码校验
+      if (!req.username || !req.password) {
+        throw new Error('请输入账号和密码');
+      }
+      if (req.password.length < 6) {
+        throw new Error('密码错误');
+      }
+      // 校验：admin 为内置管理员，其它账号从已保存的凭据中匹配
+      const isAdmin = req.username === 'admin' && req.password === 'admin123';
+      // 检查已注册账号（从 local storage 读取）
+      let registered = false;
+      try {
+        const raw = localStorage.getItem('login_credentials');
+        if (raw) {
+          const creds = JSON.parse(raw);
+          const accounts = creds.accounts || (creds.username ? [{ username: creds.username, password: creds.password }] : []);
+          registered = accounts.some((a: any) => a.username === req.username && a.password === req.password);
+        }
+      } catch {}
+      if (!isAdmin && !registered) {
+        set({ error: '账号或密码错误', loading: false });
+        return;
+      }
 
       // Check MFA requirement (mock)
       if (req.username === 'admin' && !req.rememberMe) {
@@ -64,6 +87,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         displayName: req.username,
       };
 
+      localStorage.removeItem('logged_out');
       set({
         isAuthenticated: true,
         user: userInfo,
@@ -94,6 +118,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // TODO: Call logout API
       await new Promise((r) => setTimeout(r, 300));
     } finally {
+      localStorage.setItem('logged_out', 'true');
       localStorage.removeItem('auth_user');
       localStorage.removeItem('auth_token');
       set({

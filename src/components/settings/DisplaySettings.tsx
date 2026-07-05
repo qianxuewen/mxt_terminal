@@ -15,11 +15,11 @@ const DisplaySettings: React.FC = () => {
   const { settings, saveSettings } = useSettingsStore();
   const display = settings.display;
 
-  const [resolutions, setResolutions] = useState<Record<number, string>>({ 1: '1920x1080', 2: '1920x1080' });
+  const [resolutions, setResolutions] = useState<Record<number, string>>(display.resolutions || { 1: '1920x1080', 2: '1920x1080' });
   const [selectedMonitor, setSelectedMonitor] = useState<number>(1);
-  const [dualMode, setDualMode] = useState<'extend' | 'copy'>('extend');
-  const [monitorReversed, setMonitorReversed] = useState(false);
-  const [monitorVertical, setMonitorVertical] = useState(false);
+  const [dualMode, setDualMode] = useState<'extend' | 'copy'>(display.dualMode || 'extend');
+  const [monitorReversed, setMonitorReversed] = useState(display.monitorReversed || false);
+  const [monitorVertical, setMonitorVertical] = useState(display.monitorVertical || false);
 
   // 检测到的显示器（假设已接入双屏）
   const monitors = [
@@ -28,7 +28,15 @@ const DisplaySettings: React.FC = () => {
   ];
 
   const handleSave = () => {
-    saveSettings({ display });
+    saveSettings({
+      display: {
+        ...display,
+        dualMode,
+        monitorVertical,
+        monitorReversed,
+        resolutions,
+      },
+    });
     toast.success('屏幕设置已保存');
   };
 
